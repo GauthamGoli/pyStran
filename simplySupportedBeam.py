@@ -156,7 +156,7 @@ class SimplySupportedBeam():
         #print 'type' + str(type(b_e))
         self.pointloads,self.udl,self.moments,self.reactions,self.uvl,self.e = [],[],[],[],[],b_e
         self.iType = i_Type
-        self.i = [[sect.start,sect.end,sect.I] for sect in sections]
+        self.i = [[sect.start,sect.end,sect.I*10**12] for sect in sections]
         self.My,self.Sy,self.x_samples = [],[],[]
         self.connections,self.supports = [],[]
         self.parts = 10000
@@ -165,7 +165,7 @@ class SimplySupportedBeam():
         #print "Enter uvl as [[x,load_magnitude],[x2,load_magnitude2],....] and call the method applyUVL()"
         # UNITS OF E: GPa, UNITS OF I: mm4
     def recalculate(self):
-        self.i = [[sect.start,sect.end,sect.I] for sect in sections]
+        self.i = [[sect.start,sect.end,sect.I*10**12] for sect in sections]
     
     def applyPointLoads(self, b_loads):
         """
@@ -297,6 +297,30 @@ class SimplySupportedBeam():
         plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
         plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
         plt.show()
+
+    def BDDcalculations(self):
+        """ Does BDD calculations """
+        tension,compression,shear = [],[],[]
+        for x,My in zip(self.x_samples,self.My):
+            section = [sect for sect in sections if (sect.start==0 and x==0) or (sect.start<x and sect.end>=x)]
+            if len(section)!=1:
+                print x
+                print "check the code dude!"
+                sys.exit()
+            section = section.pop()
+            if My>=0: #sagging
+                tension.append(My*section.ybottom*10**-3/section.I)
+                compression.append(My*section.ytop*10**-3/section.I)
+            elif My<0:
+                compression.append(-My*section.ybottom*10**-3/section.I)
+                tension.append(-My*section.ytop*10**-3/section.I)
+        for x,Sy in zip(self.x_samples,self.Sy):
+            section = [sect for sect in sections if (sect.start==0 and x==0) or (sect.start<x and sect.end>=x)]
+            if len(section)>1:
+                print "check code"
+                sys.exit()
+            section = section.pop()
+            shear.append(abs(Sy)*10**-3/section.A)
         
     def deflection(self,x):
             """ finds  the deflection at a point using unit load method, My is an array of M values along beam"""
@@ -489,7 +513,9 @@ sections.append(RTsection([0,6],H=0.1,B=1.2,h=0.2,b=0.8,l=6,p=600))
 sections.append(RTsection([6,12],H=0.23,B=1.8,h=0.25,b=1.2,l=6,p=600))
 sections.append(RTsection([12,18],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
 sections.append(RTsection([18,20],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
-sections.append(Tsection([20,100],H=0.43,B=2.9,h=0.25,b=2.1,l=100-20,p=600))
+sections.append(Tsection([20,90],H=0.43,B=2.9,h=0.25,b=2.1,l=90-20,p=600))
+#sections.append(Tsection([90,91],H=0.43,B=2.9,h=0.2,b=2.1,l=1,p=600))
+sections.append(Tsection([90,100],H=0.43,B=2.9,h=0.25,b=2.1,l=100-90,p=600))
 sections.append(RTsection([100,102],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
 sections.append(RTsection([102,108],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
 #sections.append(RTsection([105,108],H=0.25,B=2.5,h=0.25,b=1.8,l=3,p=600))
@@ -505,4 +531,41 @@ beam1.findreactions()
 beam1.calculations()
 #beam1.plotBMSFD()
 estimatecost(sections)
-beam1.plotBDD()
+#beam1.plotBDD()
+beam1.BDDcalculations()
+
+def beamupdate(beam):
+    beam.__init__(120,b_e=10,i_Type = 'constant')
+    beam.specifySupports(pinArray=[15,60.0],rollerArray=[105.0],hingeArray=[60.0])
+    beam.udl=[]
+    beam.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
+    beam.findreactions()
+    beam.calculations()
+    beam.BDDcalculations()
+    return
+    
+    
+
+for x in range(90,100,1):
+    for sect in sections:
+        if sect.start==x:
+            sections.insert(sections.index(sect)+1,Tsection([sect.start+1,sect.end],H=sect.H,B=sect.B,h=sect.h,b=sect.b,l=sect.l-1,p=sect.p))
+            sect.l = 1.0
+            sect.end = (x+1.0)
+            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
+            while not(round(fl_comp,1)>=37 and round(fl_comp,1)<40):
+                            if fl_comp<28:
+                                decrement=0.04
+                            elif fl_comp>=30:
+                                decrement=0.01
+                            sect.__init__(BD=[sect.start,sect.end],H=sect.H,B=sect.B,h=sect.h-decrement,b=sect.b,l=sect.l,p=sect.p)
+                            beamupdate(beam1)
+                            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
+                            print "is it converging?:"+str(fl_comp)
+        if x==98:
+            break
+print "probably over>?"
+                            
+            
+
+
