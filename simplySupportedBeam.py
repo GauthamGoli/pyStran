@@ -156,7 +156,7 @@ class SimplySupportedBeam():
         #print 'type' + str(type(b_e))
         self.pointloads,self.udl,self.moments,self.reactions,self.uvl,self.e = [],[],[],[],[],b_e
         self.iType = i_Type
-        self.i = b_i
+        self.i = [[sect.start,sect.end,sect.I] for sect in sections]
         self.My,self.Sy,self.x_samples = [],[],[]
         self.connections,self.supports = [],[]
         self.parts = 10000
@@ -287,11 +287,12 @@ class SimplySupportedBeam():
                 sys.exit()
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
-        plotGraph(self.x_samples, tension,'','magnitude MPa','FlexuralTension',axarr[0,0])
-        plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression',axarr[1,0])
-        plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress',axarr[2,0])
+        plotGraph(self.x_samples, tension,'','magnitude MPa','FlexuralTension(60MPa)',axarr[0,0])
+        plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression(40Mpa)',axarr[1,0])
+        plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress(30MPa)',axarr[2,0])
         plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[0,1])
         plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
+        plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
         plt.show()
         
     def deflection(self,x):
@@ -461,28 +462,9 @@ def estimatecost(sections):
         totalcost+= section.l*section.A*2000.0/(0.3048**3)
     print "total Cost: " + str(totalcost/1000000.0) + " Million"
         
-#test code    case 0
-"""beam1 = continuousBeam(b_length = 8,b_e = 9.0,b_i = [[0,4.0,14.6*10**9],[4.0,8.0,(14.6*2)*10**9]], i_Type = 'constant')
-beam1.specifySupports(pinArray=[0.0],rollerArray=[8.0],hingeArray=[])
-#print beam1.getEI(7)
-beam1.applyUDL([[0,8,8]])
-beam1.applyPointLoads([[4,20]])
-#beam1.applyPointLoads([[7.5,8]])
-beam1.findreactions()
-beam1.calculations()
-beam1.deflection(4.0)"""
-#case1
-"""
-beam1 = continuousBeam(20)
-beam1.specifySupports(pinArray=[0,5,15],rollerArray=[10.0,20],hingeArray=[12,17])
-beam1.checkstability()
-beam1.applyUDL([[0,4,10]])
-beam1.applyPointLoads([[10,20]])
-beam1.findreactions()
-beam1.calculations()
-beam1.plotBMSFD()"""
 
-#case2
+
+"""#case2
 sections=[]
 sections.append(Tsection([0,37],H=0.25,B=4,h=0.3,b=2,l=37,p=600))
 sections.append(Tsection([37,120],H=0.4,B=4,h=0.4,b=2,l=83,p=600))
@@ -496,39 +478,21 @@ beam1.findreactions()
 beam1.calculations()
 #beam1.plotBMSFD()
 estimatecost(sections)
-beam1.plotBDD()
+beam1.plotBDD()"""
 
-# testcode        
+sections=[]
+#sections.append(Tsection([0,37],H=0.25,B=4,h=0.3,b=2,l=37,p=600))
+sections.append(Tsection([0,15],H=0.25,B=4,h=0.3,b=2,l=15,p=600))
+sections.append(Tsection([15,105],H=0.3,B=4,h=0.3,b=2,l=105-15,p=600))
+sections.append(Tsection([105,120],H=0.25,B=4,h=0.3,b=2,l=15,p=600))
 
-#beam1 = SimplySupportedBeam(8,200,[[0,400*10**6],[8,400*10**6]])
-#beam1.applyUDL([[4,8,10]])
-#beam1.applyUDL([[12,16,2]])
-#beam1.applyPointLoads([[2.0,5]])
-#beam1.applyPointLoads([[6,6]])
-#beam1.applyUVL([[0,5],[6,3]])
-#beam1.applyUVL([[7,6],[14,0]])
-#beam1.applyMoment([[0,5]])
-#beam1.findreactions()
-#beam1.calculations()
+beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
+beam1.specifySupports(pinArray=[15,60.0],rollerArray=[105.0],hingeArray=[60.0])
+#beam1.checkstability()
+beam1.applyUDL([[0,120,sections[0].load]])
+#beam1.applyPointLoads([[17,0.5]])
+beam1.findreactions()
+beam1.calculations()
 #beam1.plotBMSFD()
-#x,y = [], []
-"""for i in range(0,int(beam1.length*100)+5,5):
-    x.append(i/100.0)
-    y.append(-beam1.findSF(x[-1]))
-x1,y1 = [],[]
-for i in range(0,int(beam1.length*100)+5,5):
-    x1.append(i/100.0)
-    y1.append(-beam1.findBM(x1[-1]))
-    #print "x="+str(x[-1])+": "+str(y[-1]) """
-#beam1.deflection(4.0)
-#print 'def test= ' + str(beam1.deflection(4.0))
-#f, axarr = plt.subplots(2, sharex=True)  
-#plotGraph(x,y,'length','magnitude','ShearforceDiagram',axarr[0])
-
-#plotGraph(x1,y1,'length','magnitude','Bending Moment Diagram',axarr[1])
-
-#plt.show()
-#plt.savefig('graph1.png')
-#from simplySupportedBeam import *
-#import numpy
-
+estimatecost(sections)
+beam1.plotBDD()
