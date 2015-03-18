@@ -265,7 +265,7 @@ class SimplySupportedBeam():
 
     def plotBDD(self):
         """Plots flexural compression and tension along extreme fibers BDD:Boundary Diagrams :P"""
-        f, axarr = plt.subplots(5, sharex=True)
+        f, axarr = plt.subplots(3,2)
         tension,compression,shear = [],[],[]
         for x,My in zip(self.x_samples,self.My):
             section = [sect for sect in sections if (sect.start==0 and x==0) or (sect.start<x and sect.end>=x)]
@@ -287,11 +287,11 @@ class SimplySupportedBeam():
                 sys.exit()
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
-        plotGraph(self.x_samples, tension,'','magnitude MPa','FlexuralTension',axarr[0])
-        plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression',axarr[1])
-        plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress',axarr[2])
-        plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[3])
-        plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[4])
+        plotGraph(self.x_samples, tension,'','magnitude MPa','FlexuralTension',axarr[0,0])
+        plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression',axarr[1,0])
+        plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress',axarr[2,0])
+        plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[0,1])
+        plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
         plt.show()
         
     def deflection(self,x):
@@ -455,7 +455,12 @@ class continuousBeam(SimplySupportedBeam):
             self.reactions.append(reaction(x,reac))
         self.findreactions()
             
-    
+def estimatecost(sections):
+    totalcost=0.0
+    for section in sections:
+        totalcost+= section.l*section.A*2000.0/(0.3048**3)
+    print "total Cost: " + str(totalcost/1000000.0) + " Million"
+        
 #test code    case 0
 """beam1 = continuousBeam(b_length = 8,b_e = 9.0,b_i = [[0,4.0,14.6*10**9],[4.0,8.0,(14.6*2)*10**9]], i_Type = 'constant')
 beam1.specifySupports(pinArray=[0.0],rollerArray=[8.0],hingeArray=[])
@@ -478,7 +483,6 @@ beam1.calculations()
 beam1.plotBMSFD()"""
 
 #case2
-cost = 2000.0/(0.3048**3)
 sections=[]
 sections.append(Tsection([0,37],H=0.25,B=4,h=0.3,b=2,l=37,p=600))
 sections.append(Tsection([37,120],H=0.4,B=4,h=0.4,b=2,l=83,p=600))
@@ -491,7 +495,7 @@ beam1.applyUDL([[0,37,sections[0].load],[37,120,sections[1].load]])
 beam1.findreactions()
 beam1.calculations()
 #beam1.plotBMSFD()
-
+estimatecost(sections)
 beam1.plotBDD()
 
 # testcode        
