@@ -164,6 +164,9 @@ class SimplySupportedBeam():
         #print "Enter udl as [[start,end,load in kN/m ]....] and call the method applyUDL()"
         #print "Enter uvl as [[x,load_magnitude],[x2,load_magnitude2],....] and call the method applyUVL()"
         # UNITS OF E: GPa, UNITS OF I: mm4
+    def recalculate(self):
+        self.i = [[sect.start,sect.end,sect.I] for sect in sections]
+    
     def applyPointLoads(self, b_loads):
         """
         b_loads = [ [location,load in kN],.... ]
@@ -486,7 +489,7 @@ sections.append(RTsection([0,6],H=0.1,B=1.2,h=0.2,b=0.8,l=6,p=600))
 sections.append(RTsection([6,12],H=0.23,B=1.8,h=0.25,b=1.2,l=6,p=600))
 sections.append(RTsection([12,18],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
 sections.append(RTsection([18,20],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
-sections.append(Tsection([20,100],H=0.3,B=3.3,h=0.3,b=1.8,l=100-20,p=600))
+sections.append(Tsection([20,100],H=0.43,B=2.9,h=0.25,b=2.1,l=100-20,p=600))
 sections.append(RTsection([100,102],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
 sections.append(RTsection([102,108],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
 #sections.append(RTsection([105,108],H=0.25,B=2.5,h=0.25,b=1.8,l=3,p=600))
@@ -496,7 +499,7 @@ sections.append(RTsection([114,120],H=0.1,B=1.2,h=0.2,b=0.8,l=6,p=600))
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
 beam1.specifySupports(pinArray=[15,60.0],rollerArray=[105.0],hingeArray=[60.0])
 #beam1.checkstability()
-beam1.applyUDL([[0,120,sections[0].load]])
+beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
 beam1.findreactions()
 beam1.calculations()
