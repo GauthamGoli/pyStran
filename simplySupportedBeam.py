@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 from operator import itemgetter
 import numpy,sys
-from sections import Tsection
+from sections import Tsection,RTsection
 
 class Beam():
     """
@@ -482,9 +482,13 @@ beam1.plotBDD()"""
 
 sections=[]
 #sections.append(Tsection([0,37],H=0.25,B=4,h=0.3,b=2,l=37,p=600))
-sections.append(Tsection([0,15],H=0.25,B=4,h=0.3,b=2,l=15,p=600))
+sections.append(RTsection([0,6],H=0.1,B=1.5,h=0.2,b=1,l=6,p=600))
+sections.append(RTsection([6,12],H=0.25,B=2,h=0.25,b=2,l=6,p=600))
+sections.append(RTsection([12,15],H=0.25,B=3.5,h=0.25,b=2,l=3,p=600))
 sections.append(Tsection([15,105],H=0.3,B=4,h=0.3,b=2,l=105-15,p=600))
-sections.append(Tsection([105,120],H=0.25,B=4,h=0.3,b=2,l=15,p=600))
+sections.append(RTsection([105,108],H=0.25,B=3.5,h=0.25,b=2,l=3,p=600))
+sections.append(RTsection([108,114],H=0.25,B=2,h=0.25,b=2,l=6,p=600))
+sections.append(RTsection([114,120],H=0.1,B=1.5,h=0.2,b=1,l=6,p=600))
 
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
 beam1.specifySupports(pinArray=[15,60.0],rollerArray=[105.0],hingeArray=[60.0])
