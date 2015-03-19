@@ -457,7 +457,7 @@ class continuousBeam(SimplySupportedBeam):
         X = numpy.linalg.solve(numpy.array(a),numpy.array(b))
         self.reactions.extend([reaction(support.x,reac[0]) for reac,support in zip(X,self.supports)])
         #print ['Reactions at x = %s = %s kN' %(support.x,reac[0]) for reac,support in zip(X,self.supports)]
-        print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
+        #print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
 
     def indeterminate(self):
         print 'Enter the positions of redundant supports(x1,x2,x3...):'
@@ -513,9 +513,11 @@ sections.append(RTsection([0,6],H=0.1,B=1.2,h=0.2,b=0.8,l=6,p=600))
 sections.append(RTsection([6,12],H=0.23,B=1.8,h=0.25,b=1.2,l=6,p=600))
 sections.append(RTsection([12,18],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
 sections.append(RTsection([18,20],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
-sections.append(Tsection([20,90],H=0.43,B=2.9,h=0.25,b=2.1,l=90-20,p=600))
+sections.append(Tsection([20,40],H=0.43,B=2.9,h=0.25,b=2.1,l=40-20,p=600))
+sections.append(Tsection([40,60],H=0.43,B=2.9,h=0.25,b=2.1,l=60-40,p=600))
+sections.append(Tsection([60,80],H=0.43,B=2.9,h=0.25,b=2.1,l=80-60,p=600))
+sections.append(Tsection([80,100],H=0.43,B=2.9,h=0.25,b=2.1,l=20,p=600))
 #sections.append(Tsection([90,91],H=0.43,B=2.9,h=0.2,b=2.1,l=1,p=600))
-sections.append(Tsection([90,100],H=0.43,B=2.9,h=0.25,b=2.1,l=100-90,p=600))
 sections.append(RTsection([100,102],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
 sections.append(RTsection([102,108],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
 #sections.append(RTsection([105,108],H=0.25,B=2.5,h=0.25,b=1.8,l=3,p=600))
@@ -544,28 +546,102 @@ def beamupdate(beam):
     beam.BDDcalculations()
     return
     
-    
 
-for x in range(90,100,1):
+for x in range(800,1000,10):
+    x=x/10.0
     for sect in sections:
         if sect.start==x:
-            sections.insert(sections.index(sect)+1,Tsection([sect.start+1,sect.end],H=sect.H,B=sect.B,h=sect.h,b=sect.b,l=sect.l-1,p=sect.p))
-            sect.l = 1.0
-            sect.end = (x+1.0)
+            if sect.l!=1:
+                sections.insert(sections.index(sect)+1,Tsection([sect.start+1,sect.end],H=sect.H,B=sect.B,h=sect.h,b=sect.b,l=(sect.l-1 if sect.l!=1 else 1),p=sect.p))
+            sect.l = 1
+            sect.end = (x+1)
             fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
-            while not(round(fl_comp,1)>=37 and round(fl_comp,1)<40):
-                            if fl_comp<28:
+            while not(round(fl_comp,1)>=38 and round(fl_comp,2)<=40):
+                            if fl_comp<20:
+                                decrement=0.06
+                            elif fl_comp<28:
                                 decrement=0.04
+                            elif fl_comp>40:
+                                decrement=-0.009
                             elif fl_comp>=30:
                                 decrement=0.01
                             sect.__init__(BD=[sect.start,sect.end],H=sect.H,B=sect.B,h=sect.h-decrement,b=sect.b,l=sect.l,p=sect.p)
                             beamupdate(beam1)
                             fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
-                            print "is it converging?:"+str(fl_comp)
-        if x==98:
-            break
+                            print "is it converging?:"+str(fl_comp)+"x=%s"%x
 print "probably over>?"
                             
             
 
+for x in range(400,600,10):
+    x=x/10.0
+    for sect in sections:
+        if sect.start==x:
+            if sect.l!=1:
+                sections.insert(sections.index(sect)+1,Tsection([sect.start+1,sect.end],H=sect.H,B=sect.B,h=sect.h,b=sect.b,l=(sect.l-01 if sect.l!=1 else 1),p=sect.p))
+            sect.l = 1
+            sect.end = (x+1)
+            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
+            while not(round(fl_comp,1)>=38 and round(fl_comp,2)<=40):
+                            if fl_comp<20:
+                                decrement=0.06
+                            elif fl_comp<28:
+                                decrement=0.04
+                            elif fl_comp>40:
+                                decrement=-0.009
+                            elif fl_comp>=30:
+                                decrement=0.01
+                            sect.__init__(BD=[sect.start,sect.end],H=sect.H,B=sect.B,h=sect.h-decrement,b=sect.b,l=sect.l,p=sect.p)
+                            beamupdate(beam1)
+                            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
+                            print "is it converging?:"+str(fl_comp)+"x=%s"%x
+print "probably over>?"
+for x in range(800,600,-10):
 
+    x=x/10.0
+    for sect in reversed(sections):
+        if sect.end==x:
+            if sect.l!=1:
+                sections.insert(sections.index(sect)-1,Tsection([sect.start,sect.end-1],H=sect.H,B=sect.B,h=sect.h,b=sect.b,l=(sect.l-1 if sect.l!=1 else 1),p=sect.p))
+            sect.l = 1
+            sect.start = (x-1)
+            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
+            while not(round(fl_comp,1)>=38 and round(fl_comp,2)<=40):
+                            if fl_comp<20:
+                                decrement=0.06
+                            elif fl_comp<28:
+                                decrement=0.04
+                            elif fl_comp>40:
+                                decrement=-0.009
+                            elif fl_comp>=30:
+                                decrement=0.01
+                            sect.__init__(BD=[sect.start,sect.end],H=sect.H,B=sect.B,h=sect.h-decrement,b=sect.b,l=sect.l,p=sect.p)
+                            beamupdate(beam1)
+                            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
+                            print "is it converging?:"+str(fl_comp)+"x=%s"%x
+print "probably over>?"
+
+for x in range(400,200,-10):
+    x=x/10.0
+    for sect in reversed(sections):
+        if sect.end==x:
+            if sect.l!=1:
+                sections.insert(sections.index(sect)-1,Tsection([sect.start,sect.end-1],H=sect.H,B=sect.B,h=sect.h,b=sect.b,l=(sect.l-1 if sect.l!=1 else 01),p=sect.p))
+            sect.l = 1
+            sect.start = (x-1)
+            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
+            while not(round(fl_comp,1)>=38 and round(fl_comp,2)<=40):
+                            if fl_comp<20:
+                                decrement=0.06
+                            elif fl_comp<28:
+                                decrement=0.04
+                            elif fl_comp>40:
+                                decrement=-0.009
+                            elif fl_comp>=30:
+                                decrement=0.01
+                            sect.__init__(BD=[sect.start,sect.end],H=sect.H,B=sect.B,h=sect.h-decrement,b=sect.b,l=sect.l,p=sect.p)
+                            beamupdate(beam1)
+                            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
+                            print "is it converging?:"+str(fl_comp)+"x=%s"%x
+print "probably over>?"
+    
