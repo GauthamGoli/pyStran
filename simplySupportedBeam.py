@@ -1,9 +1,10 @@
 # Able to solve indeterminate continuous BEAMS. Find all the reactions
-
+from __future__ import division
 import matplotlib.pyplot as plt
 from operator import itemgetter
 import numpy,sys
-from sections import Tsection,RTsection
+from sections import Tsection,RTsection,Trapezoid
+
 
 class Beam():
     """
@@ -457,7 +458,7 @@ class continuousBeam(SimplySupportedBeam):
         X = numpy.linalg.solve(numpy.array(a),numpy.array(b))
         self.reactions.extend([reaction(support.x,reac[0]) for reac,support in zip(X,self.supports)])
         #print ['Reactions at x = %s = %s kN' %(support.x,reac[0]) for reac,support in zip(X,self.supports)]
-        #print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
+        print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
 
     def indeterminate(self):
         print 'Enter the positions of redundant supports(x1,x2,x3...):'
@@ -508,24 +509,11 @@ estimatecost(sections)
 beam1.plotBDD()"""
 
 sections=[]
-#sections.append(Tsection([0,37],H=0.25,B=4,h=0.3,b=2,l=37,p=600))
-sections.append(RTsection([0,6],H=0.1,B=1.2,h=0.2,b=0.8,l=6,p=600))
-sections.append(RTsection([6,12],H=0.23,B=1.8,h=0.25,b=1.2,l=6,p=600))
-sections.append(RTsection([12,18],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
-sections.append(RTsection([18,20],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
-sections.append(Tsection([20,40],H=0.43,B=2.9,h=0.25,b=2.1,l=40-20,p=600))
-sections.append(Tsection([40,60],H=0.43,B=2.9,h=0.25,b=2.1,l=60-40,p=600))
-sections.append(Tsection([60,80],H=0.43,B=2.9,h=0.25,b=2.1,l=80-60,p=600))
-sections.append(Tsection([80,100],H=0.43,B=2.9,h=0.25,b=2.1,l=20,p=600))
-#sections.append(Tsection([90,91],H=0.43,B=2.9,h=0.2,b=2.1,l=1,p=600))
-sections.append(RTsection([100,102],H=0.15,B=1.8,h=0.25,b=1.5,l=2,p=600))
-sections.append(RTsection([102,108],H=0.25,B=2.3,h=0.25,b=2,l=6,p=600))
-#sections.append(RTsection([105,108],H=0.25,B=2.5,h=0.25,b=1.8,l=3,p=600))
-sections.append(RTsection([108,114],H=0.23,B=1.8,h=0.25,b=1.2,l=6,p=600))
-sections.append(RTsection([114,120],H=0.1,B=1.2,h=0.2,b=0.8,l=6,p=600))
-
+sections.append(Trapezoid(BD=[0,30],a=0.9,b=1.2,d=1))
+sections.append(Trapezoid(BD=[30,90],a=0.7,b=0.45,d=1))
+sections.append(Trapezoid(BD=[90,120],a=0.9,b=1.2,d=1))
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
-beam1.specifySupports(pinArray=[15,60.0],rollerArray=[105.0],hingeArray=[60.0])
+beam1.specifySupports(pinArray=[20,40,60.0],rollerArray=[80.0,100.0],hingeArray=[30.0,60.0,90.0])
 #beam1.checkstability()
 beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
@@ -533,8 +521,8 @@ beam1.findreactions()
 beam1.calculations()
 #beam1.plotBMSFD()
 estimatecost(sections)
-#beam1.plotBDD()
-beam1.BDDcalculations()
+beam1.plotBDD()
+#beam1.BDDcalculations()
 
 def beamupdate(beam):
     beam.__init__(120,b_e=10,i_Type = 'constant')
@@ -546,7 +534,7 @@ def beamupdate(beam):
     beam.BDDcalculations()
     return
     
-
+"""
 for x in range(800,1000,10):
     x=x/10.0
     for sect in sections:
@@ -644,4 +632,4 @@ for x in range(400,200,-10):
                             fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
                             print "is it converging?:"+str(fl_comp)+"x=%s"%x
 print "probably over>?"
-    
+""" 

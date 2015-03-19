@@ -1,5 +1,6 @@
+from __future__ import division
 class Tsection():
-    def __init__(self,BD,H,B,h,b,l,p):
+    def __init__(self,BD,H,B,h,b,l,p=600):
         """ BD              :[startx,endx]
             Web Height      :H meters
             Flange width    :B
@@ -53,3 +54,27 @@ class RTsection(Tsection):
         self.ycog = self.H + self.h - self.ycog
         self.ytop = self.H + self.h - self.ycog
         self.ybottom = self.ycog
+
+class Trapezoid():
+    def __init__(self,BD,a,b,d,p=600):
+        self.start=float(BD[0])
+        self.end=float(BD[1])
+        self.p=float(p)
+        self.l=self.end-self.start
+        """if (self.end-self.start)!= l:
+            print "Wrong input, check again!"
+            sys.exit()"""
+        self.a=float(a)
+        self.b=float(b)
+        self.d=float(d)
+        
+        self.A= d*(a+b)/2 # area
+        self.ycog = d*(2*a+b)/((a+b)*3)  #ycog from base
+        self.I = d**3*(a**2+4*a*b+b**2)/(36*(a+b)) # second moment about cog
+        self.ytop = d-self.ycog
+        self.ybottom = self.ycog
+        self.M = self.A*self.l*self.p
+        selfload = self.M*9.81/(1000*self.l)
+        liveload = 3000.0*9.81/1000.0
+        self.load = selfload + liveload
+        self.cost = self.A*self.l*2000.0/(0.3048**3)
