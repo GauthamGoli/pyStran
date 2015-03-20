@@ -460,7 +460,7 @@ class continuousBeam(SimplySupportedBeam):
         X = numpy.linalg.solve(numpy.array(a),numpy.array(b))
         self.reactions.extend([reaction(support.x,reac[0]) for reac,support in zip(X,self.supports)])
         #print ['Reactions at x = %s = %s kN' %(support.x,reac[0]) for reac,support in zip(X,self.supports)]
-        print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
+        #print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
 
     def indeterminate(self):
         print 'Enter the positions of redundant supports(x1,x2,x3...):'
@@ -518,15 +518,26 @@ sections=[]
 #sections.append(Trapezoid(BD=[45,60],a=0.7,b=0.45,d=1))
 #sections.append(Trapezoid(BD=[60,75],a=0.7,b=0.45,d=1))
 #sections.append(Trapezoid(BD=[75,90],a=0.7,b=0.45,d=1))
-sections.append(Trapezoid(BD=[0,10],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[0,5],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[5,10],a=0.023,b=0.161,d=1))
 sections.append(Trapezoid(BD=[10,20],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[20,40],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[20,25],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[25,30],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[30,35],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[35,40],a=0.023,b=0.161,d=1))
 sections.append(Trapezoid(BD=[40,50],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[50,70],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[50,55],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[55,60],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[60,65],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[65,70],a=0.023,b=0.161,d=1))
 sections.append(Trapezoid(BD=[70,80],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[80,100],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[80,85],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[85,90],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[90,95],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[95,100],a=0.023,b=0.161,d=1))
 sections.append(Trapezoid(BD=[100,110],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[110,120],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[110,115],a=0.023,b=0.161,d=1))
+sections.append(Trapezoid(BD=[115,120],a=0.023,b=0.161,d=1))
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
 beam1.specifySupports(pinArray=[0,15,30,45.0,60],rollerArray=[75,90,105.0,120.0],hingeArray=[10.0,20.0,40.0,60.0,80.0,100.0,110.0])
 #beam1.checkstability()
@@ -541,7 +552,7 @@ beam1.plotBDD()
 
 def beamupdate(beam):
     beam.__init__(120,b_e=10,i_Type = 'constant')
-    beam.specifySupports(pinArray=[20,40,60.0],rollerArray=[80.0,100.0],hingeArray=[30.0,60.0,90.0])
+    beam.specifySupports(pinArray=[0,15,30,45.0,60],rollerArray=[75,90,105.0,120.0],hingeArray=[10.0,20.0,40.0,60.0,80.0,100.0,110.0])
     beam.udl=[]
     beam.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
     beam.findreactions()
@@ -549,8 +560,8 @@ def beamupdate(beam):
     beam.BDDcalculations()
     return
     
-"""
-for x in range(45,60,1):
+
+for x in range(5,10,1)+range(25,30)+range(35,40)+range(55,60)+range(65,70)+range(85,90)+range(95,100)+range(115,120):
     for sect in sections:
         if sect.start==x:
             if sect.l!=1:
@@ -558,22 +569,44 @@ for x in range(45,60,1):
             sect.l = 1
             sect.end = (x+1)
             fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
-            while not(round(fl_comp,1)>=38 and round(fl_comp,2)<=40):
+            while not(round(fl_comp,1)>=38.5 and round(fl_comp,2)<=40):
                             if fl_comp<30:
-                                decrement=0.06
+                                decrement=0.001
                             elif fl_comp<35:
-                                decrement=0.04
+                                decrement=0.001
                             elif fl_comp>40:
-                                decrement=-0.009
+                                decrement=-0.0006
                             elif fl_comp>=30:
-                                decrement=0.01
-                            sect.__init__(BD=[sect.start,sect.end],a=sect.a-decrement+decrement/2.0,b=sect.b-decrement,d=sect.d)
+                                decrement=0.0005
+                            sect.__init__(BD=[sect.start,sect.end],b=(sect.a-decrement)*7,a=sect.a-decrement,d=sect.d)
                             beamupdate(beam1)
                             fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
                             print "is it converging?:"+str(fl_comp)+"x=%s"%x
 print "probably over>?"
-                            
-          
+
+for x in range(115,110,-1)+range(95,90,-1)+range(85,80,-1)+range(65,60,-1)+range(55,50,-1)+range(45,40,-1)+range(35,30,-1)+range(25,20,-1)+range(5,0,-1):
+    for sect in reversed(sections):
+        if sect.end==x:
+            if sect.l!=1:
+                sections.insert(sections.index(sect)-1,Trapezoid([sect.start,sect.end-1],a=sect.a,b=sect.b,d=sect.d))
+            sect.l = 1
+            sect.start = (x-1)
+            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I #MPa
+            while not(round(fl_comp,1)>=38 and round(fl_comp,2)<=40):
+                            if fl_comp<30:
+                                decrement=0.001
+                            elif fl_comp<35:
+                                decrement=0.001
+                            elif fl_comp>40:
+                                decrement=-0.0006
+                            elif fl_comp>=30:
+                                decrement=0.0005
+                            sect.__init__(BD=[sect.start,sect.end],b=(sect.a-decrement)*7,a=sect.a-decrement,d=sect.d)
+                            beamupdate(beam1)
+                            fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
+                            print "is it converging?:"+str(fl_comp)+"x=%s"%x
+print "probably over>?"
+"""                            
 
 for x in range(400,600,10):
     x=x/10.0
