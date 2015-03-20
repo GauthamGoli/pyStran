@@ -3,7 +3,7 @@ from __future__ import division
 import matplotlib.pyplot as plt
 from operator import itemgetter
 import numpy,sys
-from sections import Tsection,RTsection,Trapezoid
+from sections import Tsection,RTsection,Trapezoid,Isection
 
 
 class Beam():
@@ -296,6 +296,8 @@ class SimplySupportedBeam():
         plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress(30MPa)',axarr[2,0])
         plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[0,1])
         plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
+        cost = estimatecost(sections)
+        plotGraph(xdata=[0.0],ydata=[0.0],x_label=cost,y_label='',header='',plto=axarr[2,1])
         plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
         plt.show()
 
@@ -458,7 +460,7 @@ class continuousBeam(SimplySupportedBeam):
         X = numpy.linalg.solve(numpy.array(a),numpy.array(b))
         self.reactions.extend([reaction(support.x,reac[0]) for reac,support in zip(X,self.supports)])
         #print ['Reactions at x = %s = %s kN' %(support.x,reac[0]) for reac,support in zip(X,self.supports)]
-        #print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
+        print ['Reactions at x = %s = %s kN' %(reac.startx,-reac.getLoad()) for reac in self.reactions]
 
     def indeterminate(self):
         print 'Enter the positions of redundant supports(x1,x2,x3...):'
@@ -488,7 +490,9 @@ def estimatecost(sections):
     totalcost=0.0
     for section in sections:
         totalcost+= section.l*section.A*2000.0/(0.3048**3)
-    print "total Cost: " + str(totalcost/1000000.0) + " Million"
+    for reaction in beam1.reactions:
+        totalcost+= -reaction.getLoad()*10**-4*20*1.5*2000.0/(0.3048**3)
+    return "total Cost: " + str(totalcost/1000000.0) + " Million"
         
 
 
@@ -514,16 +518,24 @@ sections=[]
 #sections.append(Trapezoid(BD=[45,60],a=0.7,b=0.45,d=1))
 #sections.append(Trapezoid(BD=[60,75],a=0.7,b=0.45,d=1))
 #sections.append(Trapezoid(BD=[75,90],a=0.7,b=0.45,d=1))
-sections.append(Trapezoid(BD=[0,120],a=0.9,b=1.2,d=1))
+sections.append(Trapezoid(BD=[0,10],a=0.05,b=0.35,d=1))
+sections.append(Trapezoid(BD=[10,20],a=0.7,b=1,d=1))
+sections.append(Trapezoid(BD=[20,40],a=0.05,b=0.35,d=1))
+sections.append(Trapezoid(BD=[40,50],a=0.7,b=1,d=1))
+sections.append(Trapezoid(BD=[50,70],a=0.05,b=0.35,d=1))
+sections.append(Trapezoid(BD=[70,80],a=0.7,b=1,d=1))
+sections.append(Trapezoid(BD=[80,100],a=0.05,b=0.35,d=1))
+sections.append(Trapezoid(BD=[100,110],a=0.7,b=1,d=1))
+sections.append(Trapezoid(BD=[110,120],a=0.05,b=0.35,d=1))
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
-beam1.specifySupports(pinArray=[15,30,45.0,60],rollerArray=[75,90,105.0],hingeArray=[20.0,40.0,60.0,80.0,100.0])
+beam1.specifySupports(pinArray=[0,15,30,45.0,60],rollerArray=[75,90,105.0,120.0],hingeArray=[10.0,20.0,40.0,60.0,80.0,100.0,110.0])
 #beam1.checkstability()
 beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
 beam1.findreactions()
 beam1.calculations()
 #beam1.plotBMSFD()
-estimatecost(sections)
+print estimatecost(sections)
 beam1.plotBDD()
 #beam1.BDDcalculations()
 

@@ -78,3 +78,26 @@ class Trapezoid():
         liveload = 3000.0*9.81/1000.0
         self.load = selfload + liveload
         self.cost = self.A*self.l*2000.0/(0.3048**3)
+
+class Isection():
+    def __init__(self,BD,b,a,s,h,t,p=600):
+        self.start=float(BD[0])
+        self.end=float(BD[1])
+        self.p = float(p)
+        self.l=self.end-self.start
+        self.b=float(b)
+        self.a=float(a)
+        self.s=float(s)
+        self.h,self.t=float(h),float(t)
+        self.d=self.h+2*self.s
+        self.A=self.b*self.s+self.h*self.t+self.a*self.s
+        self.ycog=self.d-(self.t*(self.d)**2 + s**2*(b-t)+s*(a-t)*(2*self.d-s))/(2*selfA)
+        self.I = (b*(self.d-self.ycog)**3+a*(self.ycog)**3-(b-t)*(self.d-self.ycog-s)**3-(a-t)*(self.ycog-s)**3)/3.0
+        self.ytop = self.d-self.ycog
+        self.ybottom = self.ycog
+        self.M = self.A*self.l*self.p
+        selfload = self.M*9.81/(1000.0*self.I)
+        liveload = 3000.0*9.81/1000.0
+        self.load = selfload + liveload
+        self.cost = self.A*self.l*2000.0/(0.3048**3)
+        
