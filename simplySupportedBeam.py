@@ -292,7 +292,7 @@ class SimplySupportedBeam():
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
         x_sa=[]
-        for i in numpy.linspace(0,30,num=30,endpoint=True):
+        for i in numpy.linspace(0,20,num=30,endpoint=True):
             x_sa.append(i)
         for x in x_sa:
             defln.append(self.deflection(x))
@@ -301,9 +301,9 @@ class SimplySupportedBeam():
         plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression(40Mpa)',axarr[1,0])
         plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress(30MPa)',axarr[2,0])
         plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[0,1])
-        plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
+        plotGraph(self.x_samples,self.My,'','magnitude kN','Bending Moment Diagram',axarr[1,1])
         cost = estimatecost(sections)
-        plotGraph(xdata=x_sa,ydata=defln,x_label=cost,y_label='',header='',plto=axarr[2,1])
+        plotGraph(xdata=x_sa,ydata=defln,x_label=cost,y_label='deflection(L/100.0=0.2m)',header='',plto=axarr[2,1])
         plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
         plt.show()
 
@@ -494,11 +494,16 @@ class continuousBeam(SimplySupportedBeam):
             
 def estimatecost(sections):
     totalcost=0.0
+    factor={2:0,3:0,4:1,5:1.05,6:1.1,7:1.12,8:1.15,9:1.2,10:1.2,11:1.2,12:1.2,13:1.2,14:1.2,15:1.2,16:1.2}
     for section in sections:
-        totalcost+= section.l*section.A*2000.0/(0.3048**3)
+        totalcost+= section.cost
     for reaction in beam1.reactions:
-        totalcost+= -reaction.getLoad()*10**-4*20*1.5*3000*2.4
-    return "total Cost: " + str(totalcost/1000000.0) + " Million"
+        try:    
+            totalcost+= -reaction.getLoad()*10**-4*20*1.5*3000*2.4*factor[len(beam1.supports)]
+        except:
+            if len(beam1.supports)>15:
+                totalcost*=-reaction.getLoad()*10**-4*20*1.5*3000*2.4*factor[16]
+    return "TOTAL COST: " + str(totalcost/1000000.0) + " Million"
         
 
 
@@ -520,7 +525,7 @@ beam1.plotBDD()"""
 
 sections=[]
 
-sections.append(Isection(BD=[0,120],b=0.5,a=0.5,s=0.1,h=1.8,t=0.04))
+sections.append(Isection(BD=[0,120],b=0.4,a=0.5*0.05/0.07,s=0.1,h=1.2,t=0.05))
 #sections.append(Isection(BD=[10,20],b=0.4,a=0.4,s=0.3,h=0.2,t=0.2))
 #sections.append(Isection(BD=[20,40],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
 #sections.append(Isection(BD=[40,50],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
@@ -531,7 +536,7 @@ sections.append(Isection(BD=[0,120],b=0.5,a=0.5,s=0.1,h=1.8,t=0.04))
 #sections.append(Isection(BD=[110,120],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
 
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
-beam1.specifySupports(pinArray=[0,30,60],rollerArray=[90,120.0],hingeArray=[30,60,90])
+beam1.specifySupports(pinArray=[0,20,40,60],rollerArray=[80,100,120.0],hingeArray=[20,40,60,80,100])
 #beam1.checkstability()
 beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
