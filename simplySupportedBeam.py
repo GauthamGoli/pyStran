@@ -291,11 +291,11 @@ class SimplySupportedBeam():
                 sys.exit()
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
-        """x_sa=[]
-        for i in numpy.linspace(0,self.length,num=20,endpoint=True):
+        x_sa=[]
+        for i in numpy.linspace(0,30,num=30,endpoint=True):
             x_sa.append(i)
         for x in x_sa:
-            defln.append(self.deflection(x))"""
+            defln.append(self.deflection(x))
             
         plotGraph(self.x_samples, tension,'','magnitude MPa','FlexuralTension(60MPa)',axarr[0,0])
         plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression(40Mpa)',axarr[1,0])
@@ -303,7 +303,7 @@ class SimplySupportedBeam():
         plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[0,1])
         plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
         cost = estimatecost(sections)
-        plotGraph(xdata=[0],ydata=[0],x_label=cost,y_label='',header='',plto=axarr[2,1])
+        plotGraph(xdata=x_sa,ydata=defln,x_label=cost,y_label='',header='',plto=axarr[2,1])
         plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
         plt.show()
 
@@ -519,33 +519,19 @@ estimatecost(sections)
 beam1.plotBDD()"""
 
 sections=[]
-#sections.append(Trapezoid(BD=[0,30],a=0.9,b=1.2,d=1))
-#sections.append(Trapezoid(BD=[30,45],a=0.7,b=0.45,d=1))
-#sections.append(Trapezoid(BD=[45,60],a=0.7,b=0.45,d=1))
-#sections.append(Trapezoid(BD=[60,75],a=0.7,b=0.45,d=1))
-#sections.append(Trapezoid(BD=[75,90],a=0.7,b=0.45,d=1))
-sections.append(Trapezoid(BD=[0,5],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[5,10],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[10,20],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[20,25],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[25,30],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[30,35],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[35,40],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[40,50],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[50,55],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[55,60],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[60,65],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[65,70],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[70,80],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[80,85],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[85,90],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[90,95],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[95,100],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[100,110],a=0.5,b=0.8,d=.5))
-sections.append(Trapezoid(BD=[110,115],a=0.023,b=0.161,d=1))
-sections.append(Trapezoid(BD=[115,120],a=0.023,b=0.161,d=1))
+
+sections.append(Isection(BD=[0,120],b=0.5,a=0.5,s=0.1,h=1.8,t=0.04))
+#sections.append(Isection(BD=[10,20],b=0.4,a=0.4,s=0.3,h=0.2,t=0.2))
+#sections.append(Isection(BD=[20,40],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
+#sections.append(Isection(BD=[40,50],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
+#sections.append(Isection(BD=[50,70],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
+#sections.append(Isection(BD=[70,80],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
+#sections.append(Isection(BD=[80,100],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
+#sections.append(Isection(BD=[100,110],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
+#sections.append(Isection(BD=[110,120],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
+
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
-beam1.specifySupports(pinArray=[0,15,30,45.0,60],rollerArray=[75,90,105.0,120.0],hingeArray=[10.0,20.0,40.0,60.0,80.0,100.0,110.0])
+beam1.specifySupports(pinArray=[0,30,60],rollerArray=[90,120.0],hingeArray=[30,60,90])
 #beam1.checkstability()
 beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
