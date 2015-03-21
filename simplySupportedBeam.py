@@ -270,7 +270,7 @@ class SimplySupportedBeam():
     def plotBDD(self):
         """Plots flexural compression and tension along extreme fibers BDD:Boundary Diagrams :P"""
         f, axarr = plt.subplots(3,2)
-        tension,compression,shear = [],[],[]
+        tension,compression,shear,defln = [],[],[],[]
         for x,My in zip(self.x_samples,self.My):
             section = [sect for sect in sections if (sect.start==0 and x==0) or (sect.start<x and sect.end>=x)]
             if len(section)!=1:
@@ -291,13 +291,19 @@ class SimplySupportedBeam():
                 sys.exit()
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
+        """x_sa=[]
+        for i in numpy.linspace(0,self.length,num=20,endpoint=True):
+            x_sa.append(i)
+        for x in x_sa:
+            defln.append(self.deflection(x))"""
+            
         plotGraph(self.x_samples, tension,'','magnitude MPa','FlexuralTension(60MPa)',axarr[0,0])
         plotGraph(self.x_samples, compression,'','magnitude MPa','FlexuralCompression(40Mpa)',axarr[1,0])
         plotGraph(self.x_samples, shear,'','magnitude MPa','ShearStress(30MPa)',axarr[2,0])
         plotGraph(self.x_samples,self.Sy,'','magnitude kN','ShearforceDiagram',axarr[0,1])
         plotGraph(self.x_samples,self.My,'length','magnitude kN','Bending Moment Diagram',axarr[1,1])
         cost = estimatecost(sections)
-        plotGraph(xdata=[0.0],ydata=[0.0],x_label=cost,y_label='',header='',plto=axarr[2,1])
+        plotGraph(xdata=[0],ydata=[0],x_label=cost,y_label='',header='',plto=axarr[2,1])
         plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
         plt.show()
 
@@ -349,7 +355,7 @@ class SimplySupportedBeam():
                     print 'EI Values not specified for x= %s, exiting...with following error : %s' %(self.x_samples[int(i)-1],e)
                     return
             defl = numpy.trapz(I,dx=self.length/self.parts)
-            print "Deflection at x = %s = %s m" %(x,defl)
+            #print "Deflection at x = %s = %s m" %(x,defl)
             return defl
 
         
