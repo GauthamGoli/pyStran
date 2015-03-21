@@ -491,7 +491,7 @@ def estimatecost(sections):
     for section in sections:
         totalcost+= section.l*section.A*2000.0/(0.3048**3)
     for reaction in beam1.reactions:
-        totalcost+= -reaction.getLoad()*10**-4*20*1.5*2000.0/(0.3048**3)
+        totalcost+= -reaction.getLoad()*10**-4*20*1.5*3000*2.4
     return "total Cost: " + str(totalcost/1000000.0) + " Million"
         
 
@@ -560,7 +560,7 @@ def beamupdate(beam):
     beam.BDDcalculations()
     return
     
-
+"""  
 for x in range(5,10,1)+range(25,30)+range(35,40)+range(55,60)+range(65,70)+range(85,90)+range(95,100)+range(115,120):
     for sect in sections:
         if sect.start==x:
@@ -606,7 +606,7 @@ for x in range(115,110,-1)+range(95,90,-1)+range(85,80,-1)+range(65,60,-1)+range
                             fl_comp = -beam1.findBM(x)*sect.ytop*10**-3/sect.I
                             print "is it converging?:"+str(fl_comp)+"x=%s"%x
 print "probably over>?"
-"""                            
+                          
 
 for x in range(400,600,10):
     x=x/10.0
