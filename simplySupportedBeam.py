@@ -292,7 +292,7 @@ class SimplySupportedBeam():
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
         x_sa=[]
-        for i in numpy.linspace(0,20,num=30,endpoint=True):
+        for i in numpy.linspace(0,pinArray[1],num=3,endpoint=True):
             x_sa.append(i)
         for x in x_sa:
             defln.append(self.deflection(x))
@@ -525,7 +525,7 @@ beam1.plotBDD()"""
 
 sections=[]
 
-sections.append(Isection(BD=[0,120],b=0.4,a=0.5*0.05/0.07,s=0.1,h=1.2,t=0.05))
+sections.append(Isection(BD=[0,120],b=0.2,a=0.5*0.05*0.1/(0.07*0.2),s=0.2,h=0.4,t=0.0625))
 #sections.append(Isection(BD=[10,20],b=0.4,a=0.4,s=0.3,h=0.2,t=0.2))
 #sections.append(Isection(BD=[20,40],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
 #sections.append(Isection(BD=[40,50],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
@@ -535,8 +535,13 @@ sections.append(Isection(BD=[0,120],b=0.4,a=0.5*0.05/0.07,s=0.1,h=1.2,t=0.05))
 #sections.append(Isection(BD=[100,110],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
 #sections.append(Isection(BD=[110,120],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
 
+# SUPPORTS HERE ONLY
+pinArray=[0,12,24,36,48,60]
+rollerArray=[72,84,96,108.0,120]
+hingeArray=[12,24,36,48,60,72,84,96,108.0]
+
 beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
-beam1.specifySupports(pinArray=[0,20,40,60],rollerArray=[80,100,120.0],hingeArray=[20,40,60,80,100])
+beam1.specifySupports(pinArray,rollerArray,hingeArray)
 #beam1.checkstability()
 beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
@@ -549,7 +554,7 @@ beam1.plotBDD()
 
 def beamupdate(beam):
     beam.__init__(120,b_e=10,i_Type = 'constant')
-    beam.specifySupports(pinArray=[0,15,30,45.0,60],rollerArray=[75,90,105.0,120.0],hingeArray=[10.0,20.0,40.0,60.0,80.0,100.0,110.0])
+    beam.specifySupports(pinArray,rollerArray,hingeArray)
     beam.udl=[]
     beam.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
     beam.findreactions()
