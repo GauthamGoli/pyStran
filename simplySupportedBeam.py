@@ -525,7 +525,7 @@ beam1.plotBDD()"""
 
 sections=[]
 
-sections.append(Isection(BD=[0,120],b=0.2,a=0.5*0.05*0.1/(0.07*0.2),s=0.2,h=0.4,t=0.0625))
+sections.append(Isection(BD=[0,120],b=0.2375,a=0.2375,s=0.055,h=0.83,t=0.0375/0.83))
 #sections.append(Isection(BD=[10,20],b=0.4,a=0.4,s=0.3,h=0.2,t=0.2))
 #sections.append(Isection(BD=[20,40],b=0.4,a=0.4,s=0.3,h=0.4,t=0.2))
 #sections.append(Isection(BD=[40,50],b=0.4,a=0.4,s=0.3,h=0.2,t=0.3))
