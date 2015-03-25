@@ -1,7 +1,7 @@
 # Able to solve indeterminate continuous BEAMS. Find all the reactions
 from __future__ import division
 import matplotlib.pyplot as plt
-from operator import itemgetter
+from operator import itemgetter,attrgetter
 import numpy,sys,math
 from sections import Tsection,RTsection,Trapezoid,Isection
 
@@ -281,9 +281,13 @@ class SimplySupportedBeam():
             if My>=0: #sagging
                 tension.append(My*section.ybottom*10**-3/section.I)
                 compression.append(My*section.ytop*10**-3/section.I)
+                """if x>1 and My*self.My[self.My.index(My)-1]<=0:
+                    print x"""
             elif My<0:
                 compression.append(-My*section.ybottom*10**-3/section.I)
                 tension.append(-My*section.ytop*10**-3/section.I)
+                """if x>1 and My*self.My[self.My.index(My)-1]<=0:
+                    print x"""
         for x,Sy in zip(self.x_samples,self.Sy):
             section = [sect for sect in sections if (sect.start==0 and x==0) or (sect.start<x and sect.end>=x)]
             if len(section)>1:
@@ -512,7 +516,24 @@ def estimatecost(sections):
 
 #case2
 sections=[]
-sections.append(Isection(BD=[0,120],b=0.2375,a=0.2375,s=0.055,h=0.83,t=0.0375/0.83))
+bd1=[[21.9141914191,26.0066006601],[34.0114011401,38.0078007801],[46.00060006,50],[58,62],[70,74.0114011401],[94,98]]
+bd2=[[14.4254425443,21.9141914191],[26.0066006601,34.0114011401],[38.0078007801,46.00060006],[50,58],[62,70],[74.0114011401,82],[98,105]]
+bd3=[[0,10],[110,120]]
+bd4=[[10,14.4254425443],[105,110]]
+for bd in bd1:
+    sections.append(Isection(BD=bd,b=0.2375,a=0.18,s=0.055,h=0.55,t=0.0375/0.83))
+for bd in bd2:
+    sections.append(Isection(BD=bd,b=0.2,a=0.17,s=0.055,h=0.5,t=0.0375/0.83))
+for bd in bd3:
+    sections.append(Isection(BD=bd,b=0.2375,a=0.2375,s=0.055,h=0.58,t=0.0375/0.83))
+for bd in bd4:
+    sections.append(Isection(BD=bd,b=0.2275,a=0.2275,s=0.055,h=0.8,t=0.0375/0.83))
+sections.append(Isection(BD=[86,94],b=0.21,a=0.21,s=0.055,h=0.6,t=0.0375/0.83)) # bd2
+sections.append(Isection(BD=[82,86],b=0.2375,a=0.2375,s=0.055,h=0.6,t=0.0375/0.83)) #bd1
+
+sections.sort(key=attrgetter('start'),reverse=True)
+
+
 #sections.append(Tsection([37,120],H=0.4,B=4,h=0.4,b=2,l=83,p=600))
 pinArray=[0,12,24,36,48,60]
 rollerArray=[72,84,96,108,120]
