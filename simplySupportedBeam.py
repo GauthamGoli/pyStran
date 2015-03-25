@@ -2,7 +2,7 @@
 from __future__ import division
 import matplotlib.pyplot as plt
 from operator import itemgetter
-import numpy,sys
+import numpy,sys,math
 from sections import Tsection,RTsection,Trapezoid,Isection
 
 
@@ -292,7 +292,7 @@ class SimplySupportedBeam():
             section = section.pop()
             shear.append(abs(Sy)*10**-3/section.A)
         x_sa=[]
-        for i in numpy.linspace(0,pinArray[1],num=3,endpoint=True):
+        for i in numpy.linspace(0,self.length,num=20,endpoint=True):
             x_sa.append(i)
         for x in x_sa:
             defln.append(self.deflection(x))
@@ -499,30 +499,35 @@ def estimatecost(sections):
         totalcost+= section.cost
     for reaction in beam1.reactions:
         try:    
-            totalcost+= -reaction.getLoad()*10**-4*20*1.5*3000*2.4*factor[len(beam1.supports)]
+            #totalcost+= -reaction.getLoad()*10**-4*20*1.5*3000*2.4*factor[len(beam1.supports)]
+            # replacing the above line to get min area , having side = 30 cm
+            totalcost+= 0.3*0.3*20*1.5*3000*2.4*factor[len(beam1.supports)]
         except:
             if len(beam1.supports)>15:
-                totalcost*=-reaction.getLoad()*10**-4*20*1.5*3000*2.4*factor[16]
+                #totalcost*=-reaction.getLoad()*10**-4*20*1.5*3000*2.4*factor[16]
+                totalcost*=0.3*0.3*20*1.5*3000*2.4*factor[16]
     return "TOTAL COST: " + str(totalcost/1000000.0) + " Million"
         
 
 
-"""#case2
+#case2
 sections=[]
-sections.append(Tsection([0,37],H=0.25,B=4,h=0.3,b=2,l=37,p=600))
-sections.append(Tsection([37,120],H=0.4,B=4,h=0.4,b=2,l=83,p=600))
-
-beam1 = continuousBeam(120,b_e=10,b_i=[[0,37.0,49500000256],[37,120,117333336064]],i_Type = 'constant')
-beam1.specifySupports(pinArray=[0,37],rollerArray=[97],hingeArray=[37.0])
+sections.append(Isection(BD=[0,120],b=0.2375,a=0.2375,s=0.055,h=0.83,t=0.0375/0.83))
+#sections.append(Tsection([37,120],H=0.4,B=4,h=0.4,b=2,l=83,p=600))
+pinArray=[0,12,24,36,48,60]
+rollerArray=[72,84,96,108,120]
+hingeArray=[10,26,34,50,58,74,82,98,110]
+beam1 = continuousBeam(120,b_e=10,i_Type = 'constant')
+beam1.specifySupports(pinArray,rollerArray,hingeArray)
 #beam1.checkstability()
-beam1.applyUDL([[0,37,sections[0].load],[37,120,sections[1].load]])
+beam1.applyUDL([[sect.start,sect.end,sect.load] for sect in sections])
 #beam1.applyPointLoads([[17,0.5]])
 beam1.findreactions()
 beam1.calculations()
 #beam1.plotBMSFD()
 estimatecost(sections)
-beam1.plotBDD()"""
-
+beam1.plotBDD()
+"""
 sections=[]
 
 sections.append(Isection(BD=[0,120],b=0.2375,a=0.2375,s=0.055,h=0.83,t=0.0375/0.83))
@@ -550,7 +555,7 @@ beam1.calculations()
 #beam1.plotBMSFD()
 print estimatecost(sections)
 beam1.plotBDD()
-#beam1.BDDcalculations()
+#beam1.BDDcalculations()"""
 
 def beamupdate(beam):
     beam.__init__(120,b_e=10,i_Type = 'constant')
