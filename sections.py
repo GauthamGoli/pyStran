@@ -94,8 +94,8 @@ class Isection():
         self.A=self.b*self.s+self.h*self.t+self.a*self.s
         self.ycog=self.d-(self.t*(self.d)**2 + s**2*(b-t)+s*(a-t)*(2*self.d-s))/(2*self.A)
         self.I = (b*(self.d-self.ycog)**3+a*(self.ycog)**3-(b-t)*(self.d-self.ycog-s)**3-(a-t)*(self.ycog-s)**3)/3.0
-        self.ytop = self.d-self.ycog
-        self.ybottom = self.ycog
+        self.ytop = self.d-self.ycog-self.s
+        self.ybottom = self.ycog-self.s
         self.M = self.A*self.l*self.p
         selfload = self.M*9.81/(1000.0*self.l)
         liveload = 3000.0*9.81/1000.0
