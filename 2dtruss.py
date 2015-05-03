@@ -12,6 +12,7 @@ class Node():
         self.nodalforce = []  # can be a moment as well.
         self.constraints = {}
         self.displacements = {}
+        self.d = {}  # holds selttlements and stuff?
         self.code_numbers = []  # keep track of DOF code numbers
         self.load_numbers = [] # Load DOF numbers
         
@@ -19,13 +20,18 @@ class Node():
         #counterNodes = [2,5,3] list of counternodes
         self.counterNodes = counterNodes
         
-    def displacement(self,number,direction):
+    def displacement(self,number,direction,mag = 0):
+        #specify displacement DOF and known displacements(if any)
         self.displacements[direction] = number
         self.code_numbers.append(number)
+        if mag:
+            self.d[number] = mag 
         
-    def constraint(self,number,direction):
+    def constraint(self,number,direction,mag = 0):
         self.constraints[direction] = number
         self.code_numbers.append(number)
+        if mag:
+            self.d[number] = mag
 
     def load(self,number,mag):
         loads[number] = mag
@@ -79,11 +85,19 @@ class Truss():
         load = [[loads[l]] for l in sorted(loads)]
         Qk = np.array(load)
         K11 = K[:len(load),:len(load)]
-        Du = np.linalg.solve(K11,Qk)
+        K12 = K[:len(load),len(load):]
+        Dk = np.zeros((len(K)-len(K11),1))
+        # fill Dk with settlements if any
+        for node in self.nodes:
+            for number in node.d:
+                Dk[number-len(K11)-1] = node.d[number]
+
+        Du = np.linalg.solve(K11,Qk-K12.dot(Dk))
         K21 = K[len(load):,:len(load)]
-        Qu = K21.dot(Du)
+        K22 = K[len(load):,len(load):]
+        Qu = K21.dot(Du)+K22.dot(Dk)
         self.Q = np.concatenate((Qk,Qu),axis=0)
-        self.D = np.concatenate((Du,np.zeros((len(self.Q)-len(Du),1))),axis=0)
+        self.D = np.concatenate((Du,Dk),axis=0)
 
         for member in self.members:
             member.force = member.A*member.E/member.length*np.array([ [-member.lx,-member.ly,member.lx,member.ly] ]).dot(np.array([ self.D[member.nx-1],self.D[member.ny-1],self.D[member.fx-1],self.D[member.fy-1] ]))     
@@ -93,20 +107,20 @@ class Truss():
 #test code
 nodes=[]
 loads = {}
-nodes.append(Node(1,[0,0],'joint'))
-nodes[0].displacement(1,'x')
-nodes[0].displacement(2,'y')
-nodes.append(Node(2,[10,0],'roller'))
-nodes[1].displacement(5,'y')
-nodes[1].constraint(6,'x')
-nodes.append(Node(3,[10,10],'hinge'))
-nodes[2].constraint(7,'x')
-nodes[2].constraint(8,'y')
-nodes.append(Node(4,[0,10],'joint'))
-nodes[3].displacement(3,'x')
-nodes[3].displacement(4,'y')
-nodes[3].load(3,2)
-nodes[3].load(4,-4)
+nodes.append(Node(1,[4,0],'hinge'))
+nodes[0].displacement(3,'x')
+nodes[0].displacement(4,'y',-0.025)
+nodes.append(Node(2,[4,3],'joint'))
+nodes[1].displacement(2,'y')
+nodes[1].constraint(1,'x')
+nodes.append(Node(3,[0,0],'hinge'))
+nodes[2].constraint(5,'x')
+nodes[2].constraint(6,'y')
+nodes.append(Node(4,[0,3],'hinge'))
+nodes[3].displacement(7,'x')
+nodes[3].displacement(8,'y')
+#nodes[3].load(3,2)
+#nodes[3].load(4,-4)
 
 dim=0
 for node in nodes:
@@ -116,11 +130,8 @@ K = np.zeros((dim,dim))  #Global stiffness matrix (EMPTY)
 
 members=[]
 members.append(Member(nodes[0],nodes[1]))
-members.append(Member(nodes[0],nodes[2]))
-members.append(Member(nodes[0],nodes[3]))
 members.append(Member(nodes[1],nodes[2]))
 members.append(Member(nodes[1],nodes[3]))
-members.append(Member(nodes[3],nodes[2]))
 
 main = Truss(nodes,members)
 main.solve()
